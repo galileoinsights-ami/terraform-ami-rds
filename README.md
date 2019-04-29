@@ -13,7 +13,7 @@ Sizing, Multi-Region Availability, backup, update options can be provided using 
 1. **Pre-Commit Git Hook**: Install `pre-commit`. Visit https://pre-commit.com/. This is used to clean up the code before commiting to git.
 2. **AWS Secret Scanner**: Install git-secrets. Visit https://github.com/awslabs/git-secrets. This is used to scan for aws credentials before a commit occurs.
 3. **Terraform**: v0.11 Installed
-4. **Execute AMI-Security**: Run [AMI-Network Terraform module](https://github.com/galileoinsights-ami/terraform-ami-network)
+4. **Execute AMI-Network**: Run [AMI-Network Terraform module](https://github.com/galileoinsights-ami/terraform-ami-network)
 5. Have a `setup.sh` file which exports all the environment varibles mentioned below in the root directory of this workspace
 
 ## Setup Environment Variable
