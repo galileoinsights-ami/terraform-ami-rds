@@ -43,5 +43,5 @@ git secrets --scan --cached --no-index --untracked
 Execute `deploy.sh` file
 
 ```
-./deploy.sh
+export ENV="dev";./deploy.sh
 ```
