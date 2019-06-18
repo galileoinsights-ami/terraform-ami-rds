@@ -22,7 +22,7 @@ db = {
 
   backup_window = "03:00-06:00"
 
-  backup_retention_period = 0
+  backup_retention_period = 1
 
   replica_count = 1
 }

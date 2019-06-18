@@ -85,7 +85,7 @@ module "db" {
   deletion_protection             = true
 
   #Cloud Watch
-  enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
+  enabled_cloudwatch_logs_exports = ["error", "general", "slowquery", "audit"]
 
   tags                             = "${var.default_aws_tags}"
 }
