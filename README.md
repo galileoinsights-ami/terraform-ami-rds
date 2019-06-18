@@ -2,7 +2,7 @@
 
 This is used to create all the RDS instance required by AMI. Presently, this module creates the following:
 
-* MySQL 5.7 Instance
+* Aurora - MySQL 5.7 Instance
 * DB Parameter Group
 * DB Options Group
 
@@ -44,4 +44,10 @@ Execute `deploy.sh` file
 
 ```
 export ENV="dev";./deploy.sh
+```
+
+To delete all that has been created
+
+```
+export ENV="dev";./destroy.sh
 ```

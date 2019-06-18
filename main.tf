@@ -28,69 +28,64 @@ data "terraform_remote_state" "network" {
   }
 }
 
-module "db" {
-  source = "terraform-aws-modules/rds/aws"
-  version = "1.28.0"
 
-  identifier = "${var.db["identifier"]}"
+resource "aws_db_parameter_group" "aurora_db_57_parameter_group" {
+  name        = "ami-aurora-db-57-parameter-group"
+  family      = "aurora-mysql5.7"
+  description = "AMI Aurora DB 5.7 Parameter Group"
+}
+
+resource "aws_rds_cluster_parameter_group" "aurora_57_cluster_parameter_group" {
+  name        = "ami-aurora-57-cluster-parameter-group"
+  family      = "aurora-mysql5.7"
+  description = "AMI Aurora DB 5.7 Cluster Parameter Group"
+}
+
+module "db" {
+  source                          = "terraform-aws-modules/rds-aurora/aws"
+  version                         = "~> 1.14"
 
   # All available versions: http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html#MySQL.Concepts.VersionMgmt
-  engine            = "${var.db["engine"]}"
-  engine_version    = "${var.db["engine_version"]}"
+  engine                          = "${var.db["engine"]}"
+  engine_version                  = "${var.db["engine_version"]}"
+  db_parameter_group_name         = "${aws_db_parameter_group.aurora_db_57_parameter_group.id}"
+  db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.aurora_57_cluster_parameter_group.id}"
 
-  # DB parameter group
-  family = "${var.db["family"]}"
-  # DB option group
-  major_engine_version = "${var.db["major_engine_version"]}"
+  instance_type                  = "${var.db["instance_class"]}"
+  storage_encrypted               = "${var.db["storage_encrypted_at_rest"]}"
 
-  instance_class    = "${var.db["instance_class"]}"
-  allocated_storage = "${var.db["allocated_storage"]}"
-  storage_encrypted = "${var.db["storage_encrypted_at_rest"]}"
-  storage_type = "${var.db["storage_type"]}"
+  #Cluster Settings
+  replica_count                   = "${var.db["replica_count"]}"
 
-  # kms_key_id        = "arm:aws:kms:<region>:<accound id>:key/<kms key id>"
-  name     = "${var.db["name"]}"
-  username = "${var.db["username"]}"
-  password = "${var.db_password}"
-  port     = "${var.db["port"]}"
+  name                            = "${var.db["name"]}"
+  username                        = "${var.db["username"]}"
+  password                        = "${var.db_password}"
+  port                            = "${var.db["port"]}"
 
-  vpc_security_group_ids = ["${data.terraform_remote_state.network.default_security_group_id}"]
+  vpc_security_group_ids          = ["${data.terraform_remote_state.network.default_security_group_id}"]
 
-  maintenance_window = "${var.db["maintenance_window"]}"
-  backup_window      = "${var.db["backup_window"]}"
+  preferred_maintenance_window    = "${var.db["maintenance_window"]}"
+  preferred_backup_window         = "${var.db["backup_window"]}"
 
-  multi_az = "${var.db["multi_az"]}"
 
-  backup_retention_period = "${var.db["backup_retention_period"]}"
+  backup_retention_period         = "${var.db["backup_retention_period"]}"
 
   enabled_cloudwatch_logs_exports = ["audit", "general"]
 
-  # DB subnet group
-  subnet_ids = ["${data.terraform_remote_state.network.database_subnets}"]
-  db_subnet_group_name = "${data.terraform_remote_state.network.default_database_subnet_group}"
+  apply_immediately               = true
+
+  # DB Networking
+  vpc_id                          = "${data.terraform_remote_state.network.vpc_id}"
+  subnets                         = ["${data.terraform_remote_state.network.database_subnets}"]
 
   # Snapshot name upon DB deletion
-  final_snapshot_identifier = "${var.db["identifier"]}"
+  final_snapshot_identifier_prefix       = "${var.db["identifier"]}"
 
   # Database Deletion Protection
-  deletion_protection = true
+  deletion_protection             = true
 
-  options = [
-    {
-      option_name = "MARIADB_AUDIT_PLUGIN"
+  #Cloud Watch
+  enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
 
-      option_settings = [
-        {
-          name  = "SERVER_AUDIT_EVENTS"
-          value = "CONNECT"
-        },
-        {
-          name  = "SERVER_AUDIT_FILE_ROTATIONS"
-          value = "37"
-        },
-      ]
-    },
-  ]
-
-  tags = "${var.default_aws_tags}"
+  tags                             = "${var.default_aws_tags}"
 }
